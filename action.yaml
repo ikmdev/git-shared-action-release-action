@@ -74,7 +74,7 @@ runs:
           MINOR_STRING: ${{steps.splitTagString.outputs._1}}
           PATCH_STRING: ${{steps.splitTagString.outputs._2}}
 
-    - name: "[${{inputs.release_type}}] Create & Push Tag -- ${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}"
+    - name: "[${{inputs.release_type}}] Create & Push New Tag -- ${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}"
       shell: bash
       run: |
           git remote set-url origin https://git:${{inputs.ikmdevops_pat}}@github.com/${{github.repository}}.git
@@ -85,6 +85,7 @@ runs:
           git push --tags origin
       env:
           NEW_RELEASE_TAG: ${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}
+
 
     - name: "[${{inputs.release_type}}] Create Release -- ${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}"
       shell: bash
@@ -98,7 +99,13 @@ runs:
           -d '{"tag_name":"v${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}","name":"v${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}","body":"Release v${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}","draft":false,"prerelease":false,"generate_release_notes":false}'
 
         
-
+    - name: Delete existing tag 
+      shell: bash
+      if: inputs.release_type != 'Major'
+      run: |
+        git push origin v${{steps.splitTagString.outputs._0}}
+        git tag -fa v${{steps.splitTagString.outputs._0}}
+        git push origin --tags
         
 
    
