@@ -42,6 +42,10 @@ runs:
                 echo "LATEST_TAG=$(echo "$TAG" | sed "s/v//")" >> $GITHUB_OUTPUT
             fi
 
+    - name: Print Latest Release tag
+      shell: bash
+      run: echo "LATEST TAG= " ${{steps.getLatestTag.outputs.LATEST_TAG}}"
+
     - name: Split Tag String
       uses: xom9ikk/split@v1.1
       id: splitTagString
