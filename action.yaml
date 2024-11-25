@@ -69,7 +69,7 @@ runs:
     - name: "[${{inputs.release_type}}] Create & Push Tag -- ${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}"
       shell: bash
       run: |
-          git remote set-url origin https://git:${{secrets.IKMDEVOPS_PAT_TOKEN}}@github.com/${{github.repository}}.git
+          git remote set-url origin https://git:${{inputs.ikmdevops_pat}}@github.com/${{github.repository}}.git
           git pull -p
           git config user.name "ikmdevops"
           git config user.email devops@ikm.dev
