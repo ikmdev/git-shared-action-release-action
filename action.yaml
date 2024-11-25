@@ -30,7 +30,6 @@ runs:
     - name: List Latest Release Tag
       id: listLatestTag
       shell: bash
-      continue-on-error: true
       run: |
             git fetch --tags
             echo "TAG=$(git describe --tags `git rev-list --tags --max-count=1`)" >> $GITHUB_OUTPUT
@@ -38,9 +37,10 @@ runs:
 
     - name: Get Latest Release tag
       id: getLatestTag
+      if: always()
       shell: bash
       run: |
-          if [ $TAG == ' ' ]; then
+          if [ $NO_TAGS_FAILURE == 'failure' ]; then
               echo "LATEST_TAG=0.0.0" >> $GITHUB_OUTPUT
           else
               echo "LATEST_TAG=$(echo "$TAG" | sed "s/v//")" >> $GITHUB_OUTPUT
