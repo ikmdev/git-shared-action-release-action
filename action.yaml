@@ -27,24 +27,27 @@ runs:
         token: ${{inputs.ikmdevops_pat}}
         fetch-depth: 0
 
-    - name: Get Latest Release Tag
-      id: getLatestTag
+    - name: List Latest Release Tag
+      id: listLatestTag
       shell: bash
       continue-on-error: true
       run: |
             git fetch --tags
-            TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+            echo "TAG=$(git describe --tags `git rev-list --tags --max-count=1`)" >> $GITHUB_OUTPUT
             echo "TAG: " $TAG
 
-            if [ $TAG == '' ]; then
-                echo "LATEST_TAG=0.0.0" >> $GITHUB_OUTPUT
-            else
-                echo "LATEST_TAG=$(echo "$TAG" | sed "s/v//")" >> $GITHUB_OUTPUT
-            fi
-
-    - name: Print Latest Release tag
+    - name: Get Latest Release tag
+      id: getLatestTag
       shell: bash
-      run: echo "LATEST TAG= ${{steps.getLatestTag.outputs.LATEST_TAG}}"
+      run: |
+          if [ $NO_TAGS_FAILURE == 'failure' ]; then
+              echo "LATEST_TAG=0.0.0" >> $GITHUB_OUTPUT
+          else
+              echo "LATEST_TAG=$(echo "$TAG" | sed "s/v//")" >> $GITHUB_OUTPUT
+          fi
+      env:
+        NO_TAGS_FAILURE: ${{steps.listLatestTag.outcome}}
+        TAG: ${{steps.listLatestTag.outputs.TAG}}
 
     - name: Split Tag String
       uses: xom9ikk/split@v1.1
