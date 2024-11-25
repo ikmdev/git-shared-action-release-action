@@ -44,7 +44,7 @@ runs:
 
     - name: Print Latest Release tag
       shell: bash
-      run: echo "LATEST TAG= " ${{steps.getLatestTag.outputs.LATEST_TAG}}"
+      run: echo "LATEST TAG= ${{steps.getLatestTag.outputs.LATEST_TAG}}"
 
     - name: Split Tag String
       uses: xom9ikk/split@v1.1
