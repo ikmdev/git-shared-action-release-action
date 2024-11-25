@@ -105,9 +105,7 @@ runs:
       run: |
         git checkout v${{steps.splitTagString.outputs._0}}.0.0
         git pull origin v${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}
-        git push origin v${{steps.splitTagString.outputs._0}}.0.0
-        git tag -fa v${{steps.splitTagString.outputs._0}}.0.0
-        git push -f origin --tags
+        git push -f origin v${{steps.splitTagString.outputs._0}}.0.0
         
 
    
