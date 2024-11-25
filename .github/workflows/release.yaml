@@ -39,76 +39,9 @@ jobs:
           echo "ERROR: Attempting to release from branch ${{env.BRANCH_NAME}}. Release from ${{env.TRUNK_BRANCH_NAME}} branch only"
           exit 1
 
-      - name: Checkout Code
-        uses: actions/checkout@v4.2.2
+      - name: "[${{inputs.release_type}}] Release Shared Action"
+        uses: ikmdev/git-shared-action-release-action@main
         with:
-            token: ${{secrets.IKMDEVOPS_PAT_TOKEN}}
-            fetch-depth: 0
-
-      - name: Get Latest Release Tag
-        id: getLatestTag
-        run: |
-            git fetch --tags
-            TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
-            echo "TAG: " $TAG
-
-            if [ $TAG == '' ]; then
-                echo "LATEST_TAG=0.0.0" >> $GITHUB_OUTPUT
-            else
-                echo "LATEST_TAG=$(echo "$TAG" | sed "s/v//")" >> $GITHUB_OUTPUT
-            fi
-
-
-      - name: Split Tag String
-        uses: xom9ikk/split@v1.1
-        id: splitTagString
-        with:
-            string: ${{steps.getLatestTag.outputs.LATEST_TAG}}
-            separator: .
-            limit: -1
-
-      - name: "[${{inputs.release_type}}] Increment Tag Version"
-        id: incrementedTagVersion
-        run: |
-            if [ $RELEASE_TYPE == 'Major' ]; then
-              echo "NEW_RELEASE_TAG=$(($MAJOR_STRING + 1)).0.0" >> $GITHUB_OUTPUT
-            elif [ $RELEASE_TYPE == 'Minor' ]; then
-              echo "NEW_RELEASE_TAG=${MAJOR_STRING}.$(($MINOR_STRING + 1)).0" >> $GITHUB_OUTPUT
-            else
-              echo "NEW_RELEASE_TAG=${MAJOR_STRING}.${MINOR_STRING}.$(($PATCH_STRING + 1))" >> $GITHUB_OUTPUT
-            fi
-        env:
-            RELEASE_TYPE: ${{inputs.release_type}}
-            MAJOR_STRING: ${{steps.splitTagString.outputs._0}}
-            MINOR_STRING: ${{steps.splitTagString.outputs._1}}
-            PATCH_STRING: ${{steps.splitTagString.outputs._2}}
-
-      - name: "[${{inputs.release_type}}] Create & Push Tag -- ${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}"
-        run: |
-          git remote set-url origin https://git:${{secrets.IKMDEVOPS_PAT_TOKEN}}@github.com/${{github.repository}}.git
-          git pull -p
-          git config user.name "ikmdevops"
-          git config user.email devops@ikm.dev
-          git tag -a v$NEW_RELEASE_TAG -m"Release Version $NEW_RELEASE_TAG"
-          git push --tags origin
-        env:
-            NEW_RELEASE_TAG: ${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}
-
-      - name: "[${{inputs.release_type}}] Create Release -- ${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}"
-        run: |
-         curl -L \
-           -X POST \
-           -H "Accept: application/vnd.github+json" \
-           -H "Authorization: Bearer ${{secrets.GITHUB_TOKEN}}" \
-           -H "X-GitHub-Api-Version: 2022-11-28" \
-           https://api.github.com/repos/${{github.repository}}/releases \
-          -d '{"tag_name":"v${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}","name":"v${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}","body":"Release v${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}","draft":false,"prerelease":false,"generate_release_notes":false}'
-
-        
-
-
-
-        
-
-
-      
+           ikmdevops_pat: ${{secrets.IKMDEVOPS_PAT_TOKEN}}
+           github_token: ${{secrets.GITHUB_TOKEN}}
+           release_type: ${{inputs.release_type}} 
