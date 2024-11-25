@@ -41,46 +41,46 @@ runs:
                 echo "LATEST_TAG=$(echo "$TAG" | sed "s/v//")" >> $GITHUB_OUTPUT
             fi
 
-   - name: Split Tag String
-     uses: xom9ikk/split@v1.1
-     id: splitTagString
-     with:
-        string: ${{steps.getLatestTag.outputs.LATEST_TAG}}
-        separator: .
-        limit: -1
+    - name: Split Tag String
+      uses: xom9ikk/split@v1.1
+      id: splitTagString
+      with:
+          string: ${{steps.getLatestTag.outputs.LATEST_TAG}}
+          separator: .
+          limit: -1
 
-  - name: "[${{inputs.release_type}}] Increment Tag Version"
-    id: incrementedTagVersion
-    shell: bash
-    run: |
-        if [ $RELEASE_TYPE == 'Major' ]; then
-          echo "NEW_RELEASE_TAG=$(($MAJOR_STRING + 1)).0.0" >> $GITHUB_OUTPUT
-        elif [ $RELEASE_TYPE == 'Minor' ]; then
-          echo "NEW_RELEASE_TAG=${MAJOR_STRING}.$(($MINOR_STRING + 1)).0" >> $GITHUB_OUTPUT
-        else
-          echo "NEW_RELEASE_TAG=${MAJOR_STRING}.${MINOR_STRING}.$(($PATCH_STRING + 1))" >> $GITHUB_OUTPUT
-        fi
-    env:
-        RELEASE_TYPE: ${{inputs.release_type}}
-        MAJOR_STRING: ${{steps.splitTagString.outputs._0}}
-        MINOR_STRING: ${{steps.splitTagString.outputs._1}}
-        PATCH_STRING: ${{steps.splitTagString.outputs._2}}
+    - name: "[${{inputs.release_type}}] Increment Tag Version"
+      id: incrementedTagVersion
+      shell: bash
+      run: |
+          if [ $RELEASE_TYPE == 'Major' ]; then
+            echo "NEW_RELEASE_TAG=$(($MAJOR_STRING + 1)).0.0" >> $GITHUB_OUTPUT
+          elif [ $RELEASE_TYPE == 'Minor' ]; then
+            echo "NEW_RELEASE_TAG=${MAJOR_STRING}.$(($MINOR_STRING + 1)).0" >> $GITHUB_OUTPUT
+          else
+            echo "NEW_RELEASE_TAG=${MAJOR_STRING}.${MINOR_STRING}.$(($PATCH_STRING + 1))" >> $GITHUB_OUTPUT
+          fi
+      env:
+          RELEASE_TYPE: ${{inputs.release_type}}
+          MAJOR_STRING: ${{steps.splitTagString.outputs._0}}
+          MINOR_STRING: ${{steps.splitTagString.outputs._1}}
+          PATCH_STRING: ${{steps.splitTagString.outputs._2}}
 
-      - name: "[${{inputs.release_type}}] Create & Push Tag -- ${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}"
-        shell: bash
-        run: |
+    - name: "[${{inputs.release_type}}] Create & Push Tag -- ${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}"
+      shell: bash
+      run: |
           git remote set-url origin https://git:${{secrets.IKMDEVOPS_PAT_TOKEN}}@github.com/${{github.repository}}.git
           git pull -p
           git config user.name "ikmdevops"
           git config user.email devops@ikm.dev
           git tag -a v$NEW_RELEASE_TAG -m"Release Version $NEW_RELEASE_TAG"
           git push --tags origin
-        env:
-            NEW_RELEASE_TAG: ${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}
+      env:
+          NEW_RELEASE_TAG: ${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}
 
-      - name: "[${{inputs.release_type}}] Create Release -- ${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}"
-        shell: bash
-        run: |
+    - name: "[${{inputs.release_type}}] Create Release -- ${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}"
+      shell: bash
+      run: |
          curl -L \
            -X POST \
            -H "Accept: application/vnd.github+json" \
