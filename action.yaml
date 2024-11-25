@@ -103,9 +103,9 @@ runs:
       shell: bash
       if: inputs.release_type != 'Major'
       run: |
-        git checkout v${{steps.splitTagString.outputs._0}}.0.0
-        git pull origin v${{steps.incrementedTagVersion.outputs.NEW_RELEASE_TAG}}
+        git tag -d v${{steps.splitTagString.outputs._0}}.0.0
+        git push origin :refs/tags/v${{steps.splitTagString.outputs._0}}.0.0
+        git tag v${{steps.splitTagString.outputs._0}}.0.0
         git push -f origin v${{steps.splitTagString.outputs._0}}.0.0
-        
 
    
