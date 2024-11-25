@@ -40,7 +40,7 @@ runs:
       id: getLatestTag
       shell: bash
       run: |
-          if [ $NO_TAGS_FAILURE == 'failure' ]; then
+          if [ $TAG == '' ]; then
               echo "LATEST_TAG=0.0.0" >> $GITHUB_OUTPUT
           else
               echo "LATEST_TAG=$(echo "$TAG" | sed "s/v//")" >> $GITHUB_OUTPUT
