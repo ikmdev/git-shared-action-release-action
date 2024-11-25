@@ -30,6 +30,7 @@ runs:
     - name: Get Latest Release Tag
       id: getLatestTag
       shell: bash
+      continue-on-error: true
       run: |
             git fetch --tags
             TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
