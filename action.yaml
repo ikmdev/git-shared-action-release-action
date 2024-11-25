@@ -105,7 +105,7 @@ runs:
       run: |
         git push origin v${{steps.splitTagString.outputs._0}}.0.0
         git tag -fa v${{steps.splitTagString.outputs._0}}.0.0
-        git push origin --tags
+        git push -f origin --tags
         
 
    
